@@ -10,7 +10,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres1_data:/var/lib/postgresql/data
-      - ./postgres1-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./config/postgres_init1.sql:/docker-entrypoint-initdb.d/init.sql
 
   postgres2:
     image: postgres:latest
@@ -23,7 +23,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres2_data:/var/lib/postgresql/data
-      - ./postgres2-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./config/postgres_init2.sql:/docker-entrypoint-initdb.d/init.sql
 
   coordinator:
     image: prestodb/presto:latest
@@ -39,19 +39,19 @@ services:
       - postgres1
       - postgres2
     
-  worker:
+  worker1:
     image: prestodb/presto:latest
-    container_name: "worker0"
+    container_name: "worker1"
     ports:
       - "8083:8083"
     volumes:
-      - ./config/config_worker0.properties:/opt/presto-server/etc/config.properties
+      - ./config/config_worker1.properties:/opt/presto-server/etc/config.properties
     depends_on:
       - coordinator
 
-  # workerone:
+  # worke2:
   #   image: prestodb/presto:latest
-  #   container_name: "worker1"
+  #   container_name: "worker2"
   #   ports:
   #     - "8084:8084"
   #   volumes:
@@ -59,9 +59,9 @@ services:
   #   depends_on:
   #     - coordinator
 
-  # workertwo:
+  # worker3:
   #   image: prestodb/presto:latest
-  #   container_name: "worker2"
+  #   container_name: "worker3"
   #   ports:
   #     - "8085:8085"
   #   volumes:
