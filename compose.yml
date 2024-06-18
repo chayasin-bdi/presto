@@ -1,0 +1,74 @@
+services:
+  postgres1:
+    image: postgres:latest
+    container_name: postgres1
+    environment:
+      - POSTGRES_USER=user1
+      - POSTGRES_PASSWORD=password1
+      - POSTGRES_DB=db1
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres1_data:/var/lib/postgresql/data
+      - ./postgres1-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres2:
+    image: postgres:latest
+    container_name: postgres2
+    environment:
+      - POSTGRES_USER=user2
+      - POSTGRES_PASSWORD=password2
+      - POSTGRES_DB=db2
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres2_data:/var/lib/postgresql/data
+      - ./postgres2-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  coordinator:
+    image: prestodb/presto:latest
+    ports:
+      - "8080:8080"
+    container_name: "coordinator"
+    volumes:
+      - ./config/config.properties:/opt/presto-server/etc/config.properties
+      - ./catalog:/opt/presto-server/etc/catalog
+      - ./security/password-authenticatior.properties:/etc/password-authenticatior.properties
+      - ./security/password.db:/etc/password.db
+    depends_on:
+      - postgres1
+      - postgres2
+    
+  worker:
+    image: prestodb/presto:latest
+    container_name: "worker0"
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./config/config_worker0.properties:/opt/presto-server/etc/config.properties
+    depends_on:
+      - coordinator
+
+  # workerone:
+  #   image: prestodb/presto:latest
+  #   container_name: "worker1"
+  #   ports:
+  #     - "8084:8084"
+  #   volumes:
+  #     - ./config/config_worker1.properties:/opt/presto-server/etc/config.properties
+  #   depends_on:
+  #     - coordinator
+
+  # workertwo:
+  #   image: prestodb/presto:latest
+  #   container_name: "worker2"
+  #   ports:
+  #     - "8085:8085"
+  #   volumes:
+  #     - ./config/config_worker2.properties:/opt/presto-server/etc/config.properties
+  #   depends_on:
+  #     - coordinator
+
+volumes:
+  postgres1_data:
+  postgres2_data:
